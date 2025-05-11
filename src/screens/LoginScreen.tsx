@@ -1,112 +1,125 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Image, KeyboardAvoidingView, Platform, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { TextInput, Button, Text, useTheme } from 'react-native-paper';
+import { StyleSheet, View, KeyboardAvoidingView, Platform, ScrollView, Alert, Image, Dimensions } from 'react-native';
+import { Button, Text, TextInput, Surface, ActivityIndicator } from 'react-native-paper';
 import { signIn } from '../services/authService';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-export const LoginScreen = () => {
+export const LoginScreen: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const theme = useTheme();
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Hata', 'Lütfen email ve şifrenizi girin');
+      Alert.alert('Hata', 'E-posta ve şifre alanları boş olamaz');
       return;
     }
 
     try {
+      console.log('Giriş denemesi:', email);
       setLoading(true);
-      const { data, error } = await signIn(email, password);
-      
-      if (error) {
-        let errorMessage = 'Giriş yapılamadı';
-        
-        if (error.message.includes('Invalid login')) {
-          errorMessage = 'Geçersiz email veya şifre';
-        } else if (error.message.includes('network')) {
-          errorMessage = 'İnternet bağlantısı hatası';
-        }
-        
-        Alert.alert('Giriş Hatası', errorMessage);
-      }
+      await signIn(email, password);
+      // Başarılı giriş durumunda App.tsx'deki auth listener otomatik olarak yönlendirecek
     } catch (error: any) {
-      console.error('Login hatası:', error.message);
-      Alert.alert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.');
+      console.error('Giriş işlemi sırasında hata:', error);
+      Alert.alert(
+        'Giriş Başarısız', 
+        `Giriş yapılamadı: ${error?.message || 'Geçersiz kullanıcı bilgileri'}. Lütfen bilgilerinizi kontrol edin.`
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-        style={styles.container}
+    <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
+      <StatusBar style="dark" />
+      <LinearGradient
+        colors={['#ffffff', '#f4f6f8']}
+        style={styles.background}
+      />
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
       >
         <ScrollView 
-          contentContainerStyle={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('../../assets/icon.png')} 
-              style={styles.logo} 
-              resizeMode="contain" 
-            />
-            <Text style={[styles.title, { color: theme.colors.primary }]}>Art CRM</Text>
-            <Text style={styles.subtitle}>Saha Yönetimi</Text>
+            <Surface style={styles.logoSurface}>
+              <MaterialCommunityIcons name="medical-bag" size={40} color="#4e54c8" />
+            </Surface>
+            <Text style={styles.title}>NTA İmplant CRM</Text>
+            <Text style={styles.subtitle}>Sağlık Sektörü Yönetim Sistemi</Text>
           </View>
           
-          <View style={styles.formContainer}>
-            <TextInput
-              label="Email"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              style={styles.input}
-              mode="outlined"
-              outlineStyle={{ borderRadius: 12 }}
-              left={<TextInput.Icon icon="email" />}
-            />
+          <Surface style={styles.formContainer}>
+            <Text style={styles.formTitle}>Hesabınıza Giriş Yapın</Text>
             
-            <TextInput
-              label="Şifre"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              style={styles.input}
-              mode="outlined"
-              outlineStyle={{ borderRadius: 12 }}
-              left={<TextInput.Icon icon="lock" />}
-              right={
-                <TextInput.Icon 
-                  icon={showPassword ? "eye-off" : "eye"} 
-                  onPress={() => setShowPassword(!showPassword)}
-                />
-              }
-            />
+            <View style={styles.inputContainer}>
+              <TextInput
+                label="E-posta Adresi"
+                value={email}
+                onChangeText={setEmail}
+                style={styles.input}
+                mode="outlined"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                left={<TextInput.Icon icon="email-outline" color="#4e54c8" />}
+                outlineColor="#e0e0e0"
+                activeOutlineColor="#4e54c8"
+                outlineStyle={{ borderRadius: 12 }}
+              />
+              
+              <TextInput
+                label="Şifre"
+                value={password}
+                onChangeText={setPassword}
+                style={styles.input}
+                mode="outlined"
+                secureTextEntry={secureTextEntry}
+                left={<TextInput.Icon icon="lock-outline" color="#4e54c8" />}
+                right={
+                  <TextInput.Icon 
+                    icon={secureTextEntry ? "eye-outline" : "eye-off-outline"} 
+                    onPress={() => setSecureTextEntry(!secureTextEntry)}
+                    color="#4e54c8"
+                  />
+                }
+                outlineColor="#e0e0e0"
+                activeOutlineColor="#4e54c8"
+                outlineStyle={{ borderRadius: 12 }}
+              />
+            </View>
             
-            <TouchableOpacity style={styles.forgotPasswordContainer}>
-              <Text style={[styles.forgotPassword, { color: theme.colors.primary }]}>Şifremi Unuttum?</Text>
-            </TouchableOpacity>
-            
-            <Button 
-              mode="contained" 
+            <Button
+              mode="contained"
               onPress={handleLogin}
               style={styles.button}
               loading={loading}
               disabled={loading}
+              buttonColor="#4e54c8"
+              contentStyle={styles.buttonContent}
             >
               Giriş Yap
             </Button>
-          </View>
+            
+            <Text style={styles.forgotPassword}>
+              Şifrenizi mi unuttunuz?
+            </Text>
+          </Surface>
           
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Art Meets Healthcare © {new Date().getFullYear()}</Text>
+            <Text style={styles.footerText}>
+              © 2023 NTA İmplant CRM. Tüm hakları saklıdır.
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -114,61 +127,100 @@ export const LoginScreen = () => {
   );
 };
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  scrollContainer: {
+  background: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 24,
+    alignItems: 'center',
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 50 : 20, // iPhone için daha fazla alt boşluk
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 30,
+    marginTop: Platform.OS === 'ios' ? 30 : 0, // iPhone için üst kısımda daha fazla boşluk
   },
-  logo: {
-    width: 120,
-    height: 120,
+  logoSurface: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    backgroundColor: '#fff',
     marginBottom: 16,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#333',
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#64748b',
+    color: '#666',
+    marginBottom: 10,
   },
   formContainer: {
     width: '100%',
+    maxWidth: 400,
+    padding: 24,
+    borderRadius: 16,
+    elevation: 4,
+    backgroundColor: '#fff',
+    marginBottom: 20,
+  },
+  formTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  inputContainer: {
+    marginBottom: 16,
   },
   input: {
     marginBottom: 16,
     backgroundColor: '#fff',
   },
-  forgotPasswordContainer: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
+  button: {
+    marginTop: 8,
+    borderRadius: 12,
+    elevation: 0,
+  },
+  buttonContent: {
+    height: 50,
   },
   forgotPassword: {
+    marginTop: 16,
+    textAlign: 'center',
+    color: '#4e54c8',
     fontSize: 14,
   },
-  button: {
-    padding: 5,
-    borderRadius: 12,
-  },
   footer: {
-    marginTop: 48,
-    alignItems: 'center',
+    marginTop: 'auto',
+    marginBottom: Platform.OS === 'ios' ? 30 : 16, // iPhone için daha fazla alt boşluk
   },
   footerText: {
-    color: '#64748b',
+    color: '#999',
     fontSize: 12,
+    textAlign: 'center',
   },
 });
