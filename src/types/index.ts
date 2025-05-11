@@ -115,4 +115,4 @@ export interface VisitReport {
   // İlişkili veriler
   users?: { name: string; email: string };
   clinics?: { name: string };
-}
+} 

@@ -53,4 +53,4 @@ export type RootStackNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<ReportsStackParamList>
 >;
 
-export type ReportsStackNavigationProp = NativeStackNavigationProp<ReportsStackParamList>;
+export type ReportsStackNavigationProp = NativeStackNavigationProp<ReportsStackParamList>; 

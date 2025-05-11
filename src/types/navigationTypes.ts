@@ -41,4 +41,4 @@ export type RootStackRouteProp<T extends keyof RootStackParamList> = RouteProp<
   T
 >;
 
-export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;
+export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>; 
