@@ -231,4 +231,4 @@ export const stopLocationTracking = (): boolean => {
   }
   
   return false;
-};
+}; 
