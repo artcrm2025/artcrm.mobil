@@ -1,184 +1,148 @@
-// Kullanıcı rol tipleri
-export type UserRole = 'admin' | 'manager' | 'field';
+// import { Database } from "./lib/database.types";
 
-// Kullanıcı tipi
-export interface User {
+export type UserRole = 'admin' | 'manager' | 'regional_manager' | 'field_user';
+export type UserStatus = 'active' | 'inactive' | 'pending';
+
+export type User = {
   id: string;
   email: string;
   name: string;
   role: UserRole;
-  created_at?: string;
-  last_sign_in_at?: string;
-  phone?: string;
   region_id?: number;
-  avatar_url?: string;
-  active?: boolean;
-}
+  status: UserStatus;
+  created_at: string;
+};
 
-// Klinik tipi
-export interface Clinic {
+export type Region = {
   id: number;
   name: string;
-  address: string;
-  city: string;
-  phone: string;
+  status?: 'active' | 'inactive';
+  created_at: string;
+  created_by?: string;
+};
+
+export type Clinic = {
+  id: number;
+  name: string;
+  address?: string;
+  contact_person?: string;
+  contact_info?: string;
   email?: string;
   region_id: number;
-  region_name?: string;
+  status: 'active' | 'inactive';
   created_at: string;
-  updated_at?: string;
-  doctor_name?: string;
-  notes?: string;
-  lat?: number;
-  lng?: number;
-  status?: 'active' | 'inactive';
-  image_url?: string;
-}
+  created_by?: string;
+};
 
-// Bölge tipi
-export interface Region {
+export type Product = {
   id: number;
   name: string;
-  manager_id?: string;
-  manager_name?: string;
-  created_at?: string;
-  city_list?: string[];
-}
-
-// Teklif durumları
-export type ProposalStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'completed';
-
-// Teklif tipi
-export interface Proposal {
-  id: string;
-  title: string;
-  clinic_id: number;
-  clinic_name?: string;
-  user_id: string;
-  user_name?: string;
-  status: ProposalStatus;
-  total_amount: number;
-  discount_percentage?: number;
-  final_amount: number;
-  currency: string;
-  created_at: string;
-  updated_at?: string;
-  approved_at?: string;
-  approved_by?: string;
-  notes?: string;
-  items?: ProposalItem[];
-  patient_name?: string;
-  operation_date?: string;
-  payment_terms?: string;
-  valid_until?: string;
-}
-
-// Teklif kalemi tipi
-export interface ProposalItem {
-  id: string;
-  proposal_id: string;
-  product_id: number;
-  product_name?: string;
-  quantity: number;
-  unit_price: number;
-  discount_percentage?: number;
-  line_total: number;
-  created_at?: string;
-}
-
-// Ürün tipi
-export interface Product {
-  id: number;
-  name: string;
-  code: string;
-  category_id: number;
-  category_name?: string;
+  description?: string;
+  category: string;
   price: number;
-  currency: string;
-  description?: string;
-  stock_level?: number;
-  image_url?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+  currency: 'TRY' | 'USD' | 'EUR';
+  status: 'active' | 'inactive';
+  created_at: string;
+  created_by?: string;
+};
 
-// Kategori tipi
-export interface Category {
+export type ProductCategory = {
   id: number;
   name: string;
-  description?: string;
-  created_at?: string;
-}
-
-// Ameliyat raporu tipi
-export interface SurgeryReport {
-  id: string;
-  title: string;
-  clinic_id: number;
-  clinic_name?: string;
-  user_id: string;
-  user_name?: string;
-  patient_name: string;
-  operation_date: string;
-  doctor_name: string;
-  operation_type: string;
-  products_used?: string[];
-  notes?: string;
-  outcome: 'successful' | 'complication' | 'other';
+  status: 'active' | 'inactive';
   created_at: string;
-  updated_at?: string;
-  image_urls?: string[];
-}
+  created_by?: string;
+};
 
-// Ziyaret raporu tipi
-export interface VisitReport {
-  id: string;
-  clinic_id: number;
-  clinic_name?: string;
+export interface Proposal {
+  id: number;
   user_id: string;
-  user_name?: string;
-  visit_date: string;
-  contact_person: string;
-  purpose: string;
-  outcome: string;
-  notes?: string;
+  clinic_id: number;
+  currency: string;
+  discount: number;
+  total_amount: number;
+  status: 'pending' | 'approved' | 'rejected' | 'expired' | 'contract_received' | 'in_transfer' | 'delivered';
   created_at: string;
-  updated_at?: string;
-  followup_date?: string;
-  duration_minutes?: number;
-  status: 'completed' | 'followup_required';
-  location?: {
-    latitude: number;
-    longitude: number;
+  updated_at: string;
+  approved_by?: string;
+  approved_at?: string;
+  notes?: string;
+  installment_count: number; // Vade sayısı (1 = peşin)
+  installment_amount?: number; // Taksit tutarı
+  first_payment_date?: string; // İlk ödeme tarihi
+  // İlişkili veriler
+  users?: { 
+    name: string; 
+    email: string 
+  };
+  creator?: {
+    name: string;
+    email?: string;
+  };
+  clinics?: { 
+    name: string;
+    contact_person?: string;
+    contact_info?: string;
+    address?: string;
   };
 }
 
-// Kampanya tipi
-export interface Campaign {
+export type ProposalItem = {
   id: number;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  discount_percentage?: number;
-  products?: number[];
-  regions?: number[];
-  status: 'active' | 'inactive' | 'draft' | 'expired';
+  proposal_id: number;
+  product_id: number;
+  quantity: number;
+  excess: boolean;
+  unit_price: number;
   created_at: string;
-  created_by: string;
-  updated_at?: string;
-  image_url?: string;
-}
+  products?: Product;
+};
 
-// Bildirim tipi
-export interface Notification {
-  id: string;
+export type SurgeryReport = {
+  id: number;
   user_id: string;
-  title: string;
-  message: string;
-  type: 'info' | 'warning' | 'success' | 'error';
-  read: boolean;
+  clinic_id: number;
+  product_id: number;
+  date: string;
+  time: string;
+  patient_name: string;
+  surgery_type: string;
+  notes?: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
   created_at: string;
-  link_type?: 'proposal' | 'surgery_report' | 'visit_report' | 'clinic' | 'campaign';
-  link_id?: string;
-}
+  clinics?: Clinic;
+  products?: Product;
+};
+
+export type VisitReport = {
+  id: number;
+  user_id: string;
+  clinic_id: number;
+  subject: string;
+  date: string;
+  time: string;
+  contact_person: string;
+  notes?: string;
+  follow_up_required: boolean;
+  follow_up_date?: string;
+  created_at: string;
+  clinics?: Clinic;
+};
+
+export type Campaign = {
+  id: number;
+  name: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  status: string; // 'active', 'inactive', 'planned' vb.
+  regions?: string; // Belki bir dizi ID veya özel bir format?
+  discount_percentage?: number;
+  total_amount?: number; // Belki kampanya için minimum tutar?
+  created_at: string;
+  updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
+  // Kampanya türüne göre ek alanlar olabilir (örn. hediye ürün ID'si)
+  // free_product_id?: number;
+};
